@@ -498,7 +498,20 @@ function Get-GPOOwners {
     [Array]$DomainGPOs = Get-GPO -All -Domain $DomainName
     $DomainGPOs | Select DisplayName,Owner | Format-Table -AutoSize
     $DomainGPOs | Out-File "$ReportDir\TrimarcADChecks-DomainGPOData-$DomainName.csv"
-    Write-Host "File save to $ReportDir\TrimarcADChecks-DomainGPOData-$DomainName.csv" 
+    Write-Host "File save to $ReportDir\TrimarcADChecks-DomainGPOData-$DomainName.csv"
+
+    $GPOPermissions = foreach ($DomainGPO in $DomainGPOs)
+    {
+        Get-GPPermissions -Guid $DomainGPO.Id -All | Where {$_.Trustee.SidType.ToString() -ne "WellKnownGroup"} | Select `
+        @{n='GPOName';e={$DomainGPO.DisplayName}},
+        @{n='AccountName';e={$_.Trustee.Name}},
+        @{n='AccountType';e={$_.Trustee.SidType.ToString()}},
+        @{n='Permissions';e={$_.Permission}}
+    }
+
+    $GPOPermissions | Format-Table
+    $GPOPermissions | Export-CSV "$ReportDir\TrimarcADChecks-DomainGPOPermissions-$DomainName.csv" -NoTypeInformation
+    Write-Host "File save to $ReportDir\TrimarcADChecks-DomainGPOPermissions-$DomainName.csv"
 }
 
 # Import Modules
