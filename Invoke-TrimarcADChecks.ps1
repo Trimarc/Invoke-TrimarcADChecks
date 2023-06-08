@@ -499,7 +499,15 @@ function Get-GPOOwners {
     $DomainGPOs | Select DisplayName,Owner | Format-Table -AutoSize
     $DomainGPOs | Out-File "$ReportDir\TrimarcADChecks-DomainGPOData-$DomainName.csv"
     Write-Host "File save to $ReportDir\TrimarcADChecks-DomainGPOData-$DomainName.csv"
+}
 
+function Get-GPOPermissions {
+    Param (
+        $ReportDir,
+        $DomainName
+    )
+
+    [Array]$DomainGPOs = Get-GPO -All -Domain $DomainName
     $GPOPermissions = foreach ($DomainGPO in $DomainGPOs)
     {
         Get-GPPermissions -Guid $DomainGPO.Id -All | Where {$_.Trustee.SidType.ToString() -ne "WellKnownGroup"} | Select `
@@ -622,6 +630,9 @@ Get-SYSVOLcpassword -ReportDir $ReportDir -DomainName $DomainName
 Write-Host "`nGPO Owners:" -Fore Cyan
 Get-GPOOwners -ReportDir $ReportDir -DomainName $DomainName
 
+## Get GPO Permissions
+Write-Host "`nGPO Permissions:" -Fore Cyan
+Get-GPOPermissions -ReportDir $ReportDir -DomainName $DomainName
 
 #####
 $EndMessageText = 
