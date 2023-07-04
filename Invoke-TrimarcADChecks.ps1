@@ -40,7 +40,7 @@ This script is provided as-is, without support.
 #>
 
 Param (
-    [string]$DomainName = 'ad.vulndomain.corp',
+    [string]$DomainName = $env:userdnsdomain,
     [string]$RootDir = 'C:\TM\'
 )
 
